@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Avatar, Button, Paper, Grid, Typography, Container } from '@material-ui/core';
+import Alert from '@material-ui/lab/Alert';
 import LockOutlinedIcon from '@material-ui/icons/LockOutlined';
 import { GoogleLogin } from 'react-google-login';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { useHistory } from 'react-router-dom';
 
 
@@ -14,16 +15,28 @@ import { signin, signup } from '../../actions/auth';
 const initialState = { firstname: '', lastname: '', email: '', password: '', confirmPassword: '' };
 
 const Auth = () => {
+
+
     const dispatch = useDispatch();
     const history = useHistory();
     const classes = useStyles();
+    let error = "";
+
+    useEffect(() => {
+        error = "";
+    }, [])
+
 
     const [showPassword, setShowPassword] = useState(false);
     const [isSignUp, setIsSignUp] = useState(false);
     const [formData, setFormData] = useState(initialState);
 
-    if (JSON.parse(localStorage.getItem("profile")))
+    const user = useSelector((state) => state.auth);
+    error = user.error;
+
+    if (JSON.parse(localStorage.getItem("profile"))) {
         history.push("/");
+    }
 
     const handleSubmit = (e) => {
         e.preventDefault();
@@ -66,7 +79,6 @@ const Auth = () => {
         console.log("Google sign in was unsuccessful!");
     };
 
-
     return (
         <Container maxWidth="xs" component="main">
             <Paper className={`${classes.paper}`} elevation={3}>
@@ -74,6 +86,7 @@ const Auth = () => {
                     <LockOutlinedIcon />
                 </Avatar>
                 <Typography variant="h5">{isSignUp ? "Sign Up" : "Sign In"}</Typography>
+                {error && <Alert severity="error">{error}</Alert>}
                 <form className={classes.form} onSubmit={handleSubmit}>
                     <Grid container spacing={2}>
                         {
